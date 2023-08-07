@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
     
     <properties>
+        <reversion>1.0-SNAPSHOT</reversion>
         <!-- Spring 相关依赖 -->
         <spring.boot.version>2.6.13</spring.boot.version>
         <spring.cloud.version>2021.0.5</spring.cloud.version>
@@ -212,6 +213,12 @@
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+    
+            <dependency>
+                <groupId>william</groupId>
+                <artifactId>micro-service-api</artifactId>
+                <version>${reversion}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
