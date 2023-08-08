@@ -50,6 +50,10 @@ https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4
 
 ![微服务注册中心的核心功能.png](docs/微服务注册中心的核心功能.png)
 
+## 客户端发起注册流程
+
+![客户端发起注册流程](docs/客户端发起注册流程.png)
+
 # LoadBalance
 
 # Gateway
