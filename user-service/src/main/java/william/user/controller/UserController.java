@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import william.api.user.dto.UserDetailDTO;
+import william.user.props.DatasourceProperties;
+
+import javax.annotation.Resource;
 
 /**
  * @author ZhangShenao
@@ -14,6 +17,9 @@ import william.api.user.dto.UserDetailDTO;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+    
+    @Resource
+    private DatasourceProperties datasourceProperties;
     
     /**
      * 查询用户详情
@@ -25,5 +31,13 @@ public class UserController {
         dto.setUserId(userId);
         dto.setUserName("用户-" + userId);
         return dto;
+    }
+    
+    /**
+     * 查询数据源名称
+     */
+    @GetMapping("/datasource_name")
+    public String datasourceName() {
+        return datasourceProperties.getDatasourceName();
     }
 }
