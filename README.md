@@ -54,11 +54,110 @@ https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4
 
 ![客户端发起注册流程](docs/客户端发起注册流程.png)
 
-# LoadBalance
+## Distro 协议原理
 
-# Gateway
+- **每个 Distro 节点都会负责一部分数据，节点自己处理这部分数据的写请求**
+- **节点负责的数据发生变更时，会将变更异步同步到其他节点**
+- **每个节点会定时将自己负责数据的 checksum 校验值发送到其他节点，以保证数据的最终一致性**
+- **新加入集群的 Distro 节点，会从其它节点拉取全量数据，并保存在本地**
 
-# Sentinel
+## Nacos 注册中心的使用
 
-# Seata
+### 1. 引入 Nacos 注册中心依赖
+
+```XML
+<!--Nacos服务注册中心-->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+```
+
+### 2. 在配置文件中指定注册中心地址
+
+```YAML
+spring:
+  application:
+    name: user-service
+  cloud:
+    nacos:
+      #配置服务&配置中心地址
+      server-addr: localhost:8848,localhost:8948,localhost:9048
+      # Nacos注册中心配置
+      discovery:
+        namespace: 9874d759-858b-4564-a5af-81fb8bc02975
+```
+
+### 3. 服务启动时，会自动发起注册
+
+## Nacos 配置中心的使用
+
+### 2. 引入 Nacos 配置中心依赖
+
+```XML
+<!--Nacos配置中心-->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+```
+
+### 2. 引入 BootStrap 依赖
+
+**引入 BootStrap 依赖，支持服务启动时优先加载 bootstrap.yml 配置文件。**
+
+```XML
+<!--BootStrap依赖,支持服务启动时优先加载bootstrap.yml配置文件-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
+</dependency>
+```
+
+### 3. 创建 bootstrap.yml 配置，指定配置中心地址和配置文件列表
+
+```YAML
+spring:
+  application:
+    name: user-service
+  cloud:
+    nacos:
+      #配置服务&配置中心地址
+      server-addr: localhost:8848,localhost:8948,localhost:9048
+      # Nacos注册中心配置
+      discovery:
+        namespace: 9874d759-858b-4564-a5af-81fb8bc02975
+
+      # Nacos配置中心配置
+      config:
+        namespace: 9874d759-858b-4564-a5af-81fb8bc02975
+        group: USER_SERVICE
+        file-extension: yml
+        extension-configs:
+          - data-id: user-service-datasource.yml
+            group: USER_SERVICE
+            refresh: true
+```
+
+### 4. 在程序中加载配置，并使用 @RefreshScope 注解实现配置自动刷新。
+
+```Java
+/**
+ * @author ZhangShenao
+ * @date 2023/8/10 10:36 AM
+ * @description: 数据源属性
+ */
+@Component
+@RefreshScope   //属性动态刷新
+public class DatasourceProperties {
+    
+    @Value("${datasource.name}")
+    private String datasourceName;
+    
+    public String getDatasourceName() {
+        return datasourceName;
+    }
+    
+}
+```
 

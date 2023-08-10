@@ -12,17 +12,32 @@
     <artifactId>user-service</artifactId>
     
     <dependencies>
+        <!--项目API依赖-->
+        <dependency>
+            <groupId>william</groupId>
+            <artifactId>micro-service-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        
+        <!--Nacos服务注册中心-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
+        
+        <!--Nacos配置中心-->
         <dependency>
-            <groupId>william</groupId>
-            <artifactId>micro-service-api</artifactId>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        
+        <!--BootStrap依赖,支持服务启动时优先加载bootstrap.yml配置文件-->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
     </dependencies>
 </project>
