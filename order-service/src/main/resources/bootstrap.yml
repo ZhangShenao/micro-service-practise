@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: order-service
+  cloud:
+    nacos:
+      #配置服务&配置中心地址
+      server-addr: localhost:8848,localhost:8948,localhost:9048
+      # Nacos注册中心配置
+      discovery:
+        namespace: 9874d759-858b-4564-a5af-81fb8bc02975
+
+      # Nacos配置中心配置
+      config:
+        namespace: 9874d759-858b-4564-a5af-81fb8bc02975
+        group: ORDER_SERVICE
+        file-extension: yml
