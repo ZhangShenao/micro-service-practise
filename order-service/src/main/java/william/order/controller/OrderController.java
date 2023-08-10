@@ -25,6 +25,9 @@ public class OrderController {
     @Resource
     private RestTemplate restTemplate;
     
+//    @Resource
+//    private CustomRandomLoadBalanceClient loadBalanceClient;
+    
     /**
      * 创建订单
      */
@@ -32,10 +35,23 @@ public class OrderController {
     public OrderDetailDTO create(@RequestBody CreateOrderParam param) {
         String userId = param.getUserId();
         String skuId = param.getSkuId();
+    
+        //使用自定义负载均衡客户端
+//        String userUri = loadBalanceClient.getInstanceUri("user-service");
+//        String userUrl = userUri + "/user/" + userId;
+//        UserDetailDTO userDetailDTO = restTemplate.getForObject(userUrl,
+//                UserDetailDTO.class);
+//
+//        String productUri = loadBalanceClient.getInstanceUri("product-service");
+//        String productUrl = productUri + "/sku/" + skuId;
+//        SkuDetailDTO skuDetailDTO = restTemplate.getForObject(productUrl,
+//                SkuDetailDTO.class);
+    
+    
         //查询用户详情
         UserDetailDTO userDetailDTO = restTemplate.getForObject("http://user-service/user/" + userId,
                 UserDetailDTO.class);
-        
+
         //查询SKU详情
         SkuDetailDTO skuDetailDTO = restTemplate.getForObject("http://product-service/sku/" + skuId,
                 SkuDetailDTO.class);
