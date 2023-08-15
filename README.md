@@ -60,7 +60,7 @@ https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4
 
 ## 心跳上报 & 健康检查流程
 
-
+![心跳上报&健康检查流程](docs/心跳上报&健康检查流程.png)
 
 ## Distro 协议原理
 
