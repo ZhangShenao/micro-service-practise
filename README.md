@@ -50,9 +50,17 @@ https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4
 
 ![微服务注册中心的核心功能.png](docs/微服务注册中心的核心功能.png)
 
-## 客户端发起注册流程
+## 服务注册流程
 
-![客户端发起注册流程](docs/客户端发起注册流程.png)
+![服务注册流程](docs/服务注册流程.png)
+
+## 服务订阅流程
+
+![服务订阅流程](docs/服务订阅流程.png)
+
+## 心跳上报 & 健康检查流程
+
+
 
 ## Distro 协议原理
 
@@ -60,6 +68,12 @@ https://github.com/alibaba/spring-cloud-alibaba/wiki/%E7%89%88%E6%9C%AC%E8%AF%B4
 - **节点负责的数据发生变更时，会将变更异步同步到其他节点**
 - **每个节点会定时将自己负责数据的 checksum 校验值发送到其他节点，以保证数据的最终一致性**
 - **新加入集群的 Distro 节点，会从其它节点拉取全量数据，并保存在本地**
+
+## Nacos 内部重要的注册表
+
+- ServiceInfoHolder#serviceInfoMap：客户端的服务列表本地缓存
+- AbstractClient#subscribers：服务端的服务订阅列表
+- AbstractClient#publishers：服务端的服务通知列表，在服务发生变更时，会回调通知所有订阅的服务
 
 ## Nacos 注册中心的使用
 
