@@ -175,3 +175,178 @@ public class DatasourceProperties {
 }
 ```
 
+# 负载均衡
+
+# 负载均衡的分类
+
+## 服务端负载均衡
+
+由负载均衡服务器（代理服务器）实现负载均衡策略，给客户端返回一个最终可调用的实例地址。
+
+典型实现：Nginx
+
+## 客户端负载均衡
+
+由客户端自行实现负载均衡策略，从注册中心拉取待调用服务的全量实例列表，自行决定向哪个实例发起调用。
+
+典型实现：Spring Cloud LoadBalancer、Ribbon
+
+**实际微服务治理中场景中，主流方案都是客户端负载均衡。**
+
+## 自定义负载均衡客户端
+
+基于 `DiscoveryClient` 实现。
+
+```Java
+package william.order.client;
+
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * @author ZhangShenao
+ * @date 2023/8/10 2:27 PM
+ * @description: 基于DiscoveryClient, 实现自定义负载均衡客户端, 采用随机算法
+ */
+@Component
+public class CustomRandomLoadBalanceClient {
+    
+    @Resource
+    private DiscoveryClient discoveryClient;
+    
+    /**
+     * 获取服务实例URI
+     *
+     * @param serviceName 服务名
+     * @return 实例URI
+     */
+    public String getInstanceUri(String serviceName) {
+        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName);
+        if (CollectionUtils.isEmpty(instances)) {
+            throw new RuntimeException("no available instance for service: " + serviceName);
+        }
+        ServiceInstance chosen = instances.get(ThreadLocalRandom.current().nextInt(0, instances.size()));
+        return chosen.getUri().toString();
+    }
+}
+```
+
+# Spring Cloud Loadbalancer 的使用
+
+## 1. 引入依赖
+
+```XML
+<!--Spring Cloud LoadBalancer 负载均衡实现-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
+```
+
+## 2. 注入 RestTemplate 实现，并增加负载均衡功能
+
+```Java
+@LoadBalanced   //负载均衡实现
+@Bean
+public RestTemplate restTemplate() {
+    return new RestTemplate();
+}
+```
+
+- 在 `LoadBalancerAutoConfiguration` 中注入 `LoadBalancerInterceptor` 拦截器，为 `RestTemplate` 增加负载均衡功能。
+- Spring Cloud Loadbalancer 会在 `BlockingLoadBalancerClientAutoConfiguration` 中注入 **`BlockingLoadBalancerClient`** ，作为负载均衡客户端的默认实现。**默认的负载均衡算法为 Round-Robin。**
+
+# 自定义负载均衡策略
+
+## 1. 自定义负载均衡器
+
+```Java
+package william.order.client;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.DefaultResponse;
+import org.springframework.cloud.client.loadbalancer.EmptyResponse;
+import org.springframework.cloud.client.loadbalancer.Request;
+import org.springframework.cloud.client.loadbalancer.Response;
+import org.springframework.cloud.loadbalancer.core.ReactorServiceInstanceLoadBalancer;
+import org.springframework.cloud.loadbalancer.core.ServiceInstanceListSupplier;
+import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * @author ZhangShenao
+ * @date 2023/8/15 2:29 PM
+ * @description: 自定义负载均衡器, 采用随机算法
+ */
+@Slf4j
+public class CustomRandomLoadBalancer implements ReactorServiceInstanceLoadBalancer {
+    
+    /**
+     * 服务列表
+     */
+    private ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider;
+    
+    public CustomRandomLoadBalancer(ObjectProvider<ServiceInstanceListSupplier> serviceInstanceListSupplierProvider) {
+        this.serviceInstanceListSupplierProvider = serviceInstanceListSupplierProvider;
+    }
+    
+    /**
+     * 实现负载均衡算法
+     */
+    @Override
+    public Mono<Response<ServiceInstance>> choose(Request request) {
+        ServiceInstanceListSupplier supplier = serviceInstanceListSupplierProvider.getIfAvailable();
+        return supplier.get().next().map(this::randomServiceInstance);
+    }
+    
+    
+    private Response<ServiceInstance> randomServiceInstance(List<ServiceInstance> instances) {
+        log.info("custom random load balance");
+        if (CollectionUtils.isEmpty(instances)) {
+            return new EmptyResponse();
+        }
+        int idx = ThreadLocalRandom.current().nextInt(0, instances.size());
+        return new DefaultResponse(instances.get(idx));
+    }
+}
+```
+
+## 2. 负载均衡配置
+
+```Java
+package william.order.config;
+
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClient;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientConfiguration;
+import org.springframework.cloud.loadbalancer.annotation.LoadBalancerClients;
+import org.springframework.context.annotation.Configuration;
+import william.order.client.CustomRandomLoadBalancer;
+
+/**
+ * @author ZhangShenao
+ * @date 2023/8/15 2:39 PM
+ * @description: 负载均衡配置
+ */
+@Configuration
+@LoadBalancerClients(defaultConfiguration = LoadBalancerClientConfiguration.class,    //默认全局配置
+        value = {@LoadBalancerClient(value = "user-service", configuration = CustomRandomLoadBalancer.class), //服务级别配置
+                @LoadBalancerClient(value = "product-service", configuration = CustomRandomLoadBalancer.class),})
+public class LoadBalancerConfig {
+    
+}
+```
+
+# 负载均衡实现流程
+
+![负载均衡实现流程](docs/负载均衡实现流程.png)
