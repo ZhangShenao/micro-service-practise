@@ -1,5 +1,8 @@
 package william.user.controller;
 
+import com.fasterxml.jackson.databind.node.POJONode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,16 +19,21 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
     
     @Resource
     private DatasourceProperties datasourceProperties;
+    
+    @Value("${PORT}")
+    private int port;
     
     /**
      * 查询用户详情
      */
     @GetMapping("/{user_id}")
     public UserDetailDTO detail(@PathVariable("user_id") String userId) {
+        log.info("query user detail. port: {}", port);
         //TODO mock
         UserDetailDTO dto = new UserDetailDTO();
         dto.setUserId(userId);
