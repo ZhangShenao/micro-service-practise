@@ -4,10 +4,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import william.api.order.dto.OrderDetailDTO;
 import william.api.product.dto.SkuDetailDTO;
 import william.api.user.dto.UserDetailDTO;
+import william.order.feign.SkuServiceFeignClient;
+import william.order.feign.UserServiceServiceFeignClient;
 import william.order.param.CreateOrderParam;
 
 import javax.annotation.Resource;
@@ -23,10 +24,10 @@ import java.util.UUID;
 public class OrderController {
     
     @Resource
-    private RestTemplate restTemplate;
+    private UserServiceServiceFeignClient userClient;   //注入Feign客户端,底层是动态代理
     
-//    @Resource
-//    private CustomRandomLoadBalanceClient loadBalanceClient;
+    @Resource
+    private SkuServiceFeignClient skuClient;
     
     /**
      * 创建订单
@@ -35,26 +36,10 @@ public class OrderController {
     public OrderDetailDTO create(@RequestBody CreateOrderParam param) {
         String userId = param.getUserId();
         String skuId = param.getSkuId();
-    
-        //使用自定义负载均衡客户端
-//        String userUri = loadBalanceClient.getInstanceUri("user-service");
-//        String userUrl = userUri + "/user/" + userId;
-//        UserDetailDTO userDetailDTO = restTemplate.getForObject(userUrl,
-//                UserDetailDTO.class);
-//
-//        String productUri = loadBalanceClient.getInstanceUri("product-service");
-//        String productUrl = productUri + "/sku/" + skuId;
-//        SkuDetailDTO skuDetailDTO = restTemplate.getForObject(productUrl,
-//                SkuDetailDTO.class);
-    
-    
-        //查询用户详情
-        UserDetailDTO userDetailDTO = restTemplate.getForObject("http://user-service/user/" + userId,
-                UserDetailDTO.class);
-
-        //查询SKU详情
-        SkuDetailDTO skuDetailDTO = restTemplate.getForObject("http://product-service/sku/" + skuId,
-                SkuDetailDTO.class);
+        
+        //Feign远程调用
+        UserDetailDTO userDetailDTO = userClient.detail(userId);     //查询用户详情
+        SkuDetailDTO skuDetailDTO = skuClient.detail(skuId);    //查询SKU详情
         
         OrderDetailDTO dto = new OrderDetailDTO();
         dto.setUserId(userId);

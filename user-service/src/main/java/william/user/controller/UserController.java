@@ -1,13 +1,10 @@
 package william.user.controller;
 
-import com.fasterxml.jackson.databind.node.POJONode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import william.api.user.dto.UserDetailDTO;
+import william.api.user.service.UserServiceInterface;
 import william.user.props.DatasourceProperties;
 
 import javax.annotation.Resource;
@@ -18,9 +15,8 @@ import javax.annotation.Resource;
  * @description: 用户API
  */
 @RestController
-@RequestMapping("/user")
 @Slf4j
-public class UserController {
+public class UserController implements UserServiceInterface {
     
     @Resource
     private DatasourceProperties datasourceProperties;
@@ -28,12 +24,16 @@ public class UserController {
     @Value("${PORT}")
     private int port;
     
-    /**
-     * 查询用户详情
-     */
-    @GetMapping("/{user_id}")
-    public UserDetailDTO detail(@PathVariable("user_id") String userId) {
+    @Override
+    public UserDetailDTO detail(String userId) {
         log.info("query user detail. port: {}", port);
+        
+        //模拟请求超时
+        //        try {
+        //            Thread.sleep(4000L);
+        //        } catch (InterruptedException e) {
+        //            throw new RuntimeException(e);
+        //        }
         //TODO mock
         UserDetailDTO dto = new UserDetailDTO();
         dto.setUserId(userId);
@@ -41,10 +41,7 @@ public class UserController {
         return dto;
     }
     
-    /**
-     * 查询数据源名称
-     */
-    @GetMapping("/datasource_name")
+    @Override
     public String datasourceName() {
         return datasourceProperties.getDatasourceName();
     }
