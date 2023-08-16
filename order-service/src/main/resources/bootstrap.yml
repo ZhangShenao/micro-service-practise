@@ -14,3 +14,16 @@ spring:
         namespace: 9874d759-858b-4564-a5af-81fb8bc02975
         group: ORDER_SERVICE
         file-extension: yml
+
+# 日志配置
+logging:
+  level:
+    william.order: debug
+
+# Feign HTTP Client配置
+#feign:
+#  httpclient:
+#    enabled: true
+#    max-connections: 200
+#    max-connections-per-route: 10
+
