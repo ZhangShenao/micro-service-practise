@@ -1,5 +1,6 @@
 package william.order.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,7 @@ public class OrderController {
      * 创建订单
      */
     @PostMapping("/")
+    @SentinelResource("create-order")   //使用注解标识需要被Sentinel流控的资源
     public OrderDetailDTO create(@RequestBody CreateOrderParam param) {
         String userId = param.getUserId();
         String skuId = param.getSkuId();

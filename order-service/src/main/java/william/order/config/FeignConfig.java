@@ -29,6 +29,6 @@ public class FeignConfig {
     //超时配置
     @Bean
     public Request.Options feignRequestOptions() {
-        return new Request.Options(5000L, TimeUnit.MILLISECONDS, 2000L, TimeUnit.MICROSECONDS, true);
+        return new Request.Options(5000L, TimeUnit.MILLISECONDS, 2000L, TimeUnit.MILLISECONDS, true);
     }
 }
