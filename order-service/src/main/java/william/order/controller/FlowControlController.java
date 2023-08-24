@@ -73,4 +73,13 @@ public class FlowControlController {
         flowControlService.visitSharedResource();
         return "{阈值类型=QPS,流控模式=链路,流控效果=快速失败}";
     }
+    
+    /**
+     * 阈值类型=QPS 流控模式=直接 流控效果=Warm Up
+     */
+    @GetMapping("/qps/direct/warmup")
+    public String qpsDirectWarmUp() {
+        flowControlService.visitSharedResource();
+        return "{阈值类型=QPS,流控模式=直接,流控效果=Warm Up}";
+    }
 }
