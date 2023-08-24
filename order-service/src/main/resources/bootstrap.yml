@@ -20,6 +20,7 @@ spring:
       transport:
         dashboard: localhost:9090 #指定控制台地址
         port: 8719  #指定应用于Sentinel之间的通信地址
+      web-context-unify: false  #关闭统一化Web Context
 
 # 日志配置
 logging:
@@ -32,4 +33,3 @@ logging:
 #    enabled: true
 #    max-connections: 200
 #    max-connections-per-route: 10
-
