@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import william.order.service.FlowControlService;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * @author ZhangShenao
@@ -41,16 +42,16 @@ public class FlowControlController {
      * 阈值类型=QPS 流控模式=关联 流控效果=快速失败
      * <p>实现的效果：当对/qps/associated/fail_fast/b资源的访问达到阈值时,就限流/qps/associated/fail_fast/a</p>
      */
-    @GetMapping("/qps/associated/fail_fast/a")
-    public String qpsAssociatedFailFastA() {
+    @GetMapping("/qps/related/fail_fast/a")
+    public String qpsRelatedFailFastA() {
         return "{阈值类型=QPS,流控模式=关联,流控效果=快速失败}";
     }
     
     /**
      * 阈值类型=QPS 流控模式=关联 流控效果=快速失败
      */
-    @GetMapping("/qps/associated/fail_fast/b")
-    public String qpsAssociatedFailFastB() {
+    @GetMapping("/qps/related/fail_fast/b")
+    public String qpsRelatedFailFastB() {
         return "{阈值类型=QPS,流控模式=关联,流控效果=快速失败}";
     }
     
@@ -79,7 +80,15 @@ public class FlowControlController {
      */
     @GetMapping("/qps/direct/warmup")
     public String qpsDirectWarmUp() {
-        flowControlService.visitSharedResource();
         return "{阈值类型=QPS,流控模式=直接,流控效果=Warm Up}";
+    }
+    
+    /**
+     * 阈值类型=QPS 流控模式=直接 流控效果=排队等待
+     */
+    @GetMapping("/qps/direct/queued")
+    public String qpsDirectQueued() {
+        System.out.println("执行线程: " + Thread.currentThread().getName() + ", 执行时间: " + new Date());
+        return "{阈值类型=QPS,流控模式=直接,流控效果=排队等待}";
     }
 }
